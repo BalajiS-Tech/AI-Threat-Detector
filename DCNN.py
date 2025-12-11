@@ -1,88 +1,120 @@
-## Importing all the Dependencies
+# DCNN.py
+
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+import os
 
+# ============================
+# Image Data Preprocessing
+# ============================
 
-## Image Preprocessing
-## Introduce some Noise/Image Augmentation 
-
+# Train data generator with augmentation
 train_data_preprocess = ImageDataGenerator(
-	rescale = 1./255,
-	shear_range = 0.2,
-	zoom_range = 0.2,
-	horizontal_flip = True)
+    rescale=1.0 / 255,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True
+)
 
-test_data_preprocess = (1./255)
+# Test data generator (only normalization)
+test_data_preprocess = ImageDataGenerator(rescale=1.0 / 255)
 
+# Load training dataset
 train = train_data_preprocess.flow_from_directory(
-	'dataset/training',
-	target_size = (128,128),
-	batch_size = 32,
-	class_mode = 'binary')
+    'dataset/training',
+    target_size=(128, 128),
+    batch_size=32,
+    class_mode='binary'
+)
 
-test = train_data_preprocess.flow_from_directory(
-	'dataset/test',
-	target_size = (128,128),
-	batch_size = 32,
-	class_mode = 'binary')
+# Load testing dataset
+test = test_data_preprocess.flow_from_directory(
+    'dataset/test',
+    target_size=(128, 128),
+    batch_size=32,
+    class_mode='binary'
+)
 
-## Initialize the Convolutional Neural Net
+# ============================
+# Building the CNN Model
+# ============================
 
-# Initialising the CNN
 cnn = Sequential()
 
-# Step 1 - Convolution
-# Step 2 - Pooling
-cnn.add(Conv2D(32, (3, 3), input_shape = (128, 128, 3), activation = 'relu'))
-cnn.add(MaxPooling2D(pool_size = (2, 2)))
+# Convolution + Pooling Layer 1
+cnn.add(Conv2D(32, (3, 3), activation='relu', input_shape=(128, 128, 3)))
+cnn.add(MaxPooling2D(pool_size=(2, 2)))
 
-# Adding a second convolutional layer
-cnn.add(Conv2D(32, (3, 3), activation = 'relu'))
-cnn.add(MaxPooling2D(pool_size = (2, 2)))
+# Convolution + Pooling Layer 2
+cnn.add(Conv2D(32, (3, 3), activation='relu'))
+cnn.add(MaxPooling2D(pool_size=(2, 2)))
 
-# Step 3 - Flattening
+# Flatten layer
 cnn.add(Flatten())
 
-# Step 4 - Full connection
-cnn.add(Dense(units = 128, activation = 'relu'))
-cnn.add(Dense(units = 1, activation = 'sigmoid'))
+# Fully connected layers
+cnn.add(Dense(units=128, activation='relu'))
+cnn.add(Dense(units=1, activation='sigmoid'))
 
-# Compiling the CNN
-cnn.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+# Compile model
+cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-history = cnn.fit_generator(train,
-                         steps_per_epoch = 250,
-                         epochs = 25,
-                         validation_data = test,
-                         validation_steps = 2000)
+# ============================
+# Training the model
+# ============================
 
-plt.plot(history.history['acc'])
-plt.plot(history.history['val_acc'])
+history = cnn.fit(
+    train,
+    epochs=10,
+    validation_data=test
+)
+
+# ============================
+# Plotting Accuracy
+# ============================
+
+plt.figure(figsize=(8, 5))
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
 plt.title('Model Accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid()
 plt.show()
 
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
+# ============================
+# Plotting Loss
+# ============================
+
+plt.figure(figsize=(8, 5))
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
 plt.title('Model Loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid()
 plt.show()
 
-test_image = image.load_img('\\dataset\\single_prediction\\9. what-does-it-mean-when-cat-wags-tail.jpg', target_size=(128,128))
-test_image = image.img_to_array(test_image)
-test_image = np.expand_dims(test_image, axis=0)
-result = cnn.predict(test_image)
-print(result)
+# ============================
+# Testing on a Single Image
+# ============================
 
-if result[0][0] == 1:
-	print('dog')
+test_image_path = os.path.join('dataset', 'single_prediction', '9. what-does-it-mean-when-cat-wags-tail.jpg')
+
+test_image = load_img(test_image_path, target_size=(128, 128))
+test_image = img_to_array(test_image)
+test_image = np.expand_dims(test_image, axis=0)
+test_image = test_image / 255.0  # Normalize
+
+result = cnn.predict(test_image)
+print("Prediction Score:", result)
+
+if result[0][0] >= 0.5:
+    print("Result: Dog")
 else:
-	print('cat')
+    print("Result: Cat")
