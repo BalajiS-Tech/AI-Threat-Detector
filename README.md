@@ -1,30 +1,41 @@
-# AI-Based Threat Detector 🔐
+# NOX EYE – AI Based Threat Detection System
 
-A real-time AI-powered threat detection system built using **HTML, CSS, Bootstrap, Python, and SQL**.  
-This project analyzes suspicious patterns, processes threat data efficiently, and displays results with a clean UI.
+NOX EYE is an AI-powered smart surveillance system that detects abnormal activity, compares faces in real-time, and alerts the user using automated notifications.  
+It uses Flask, OpenCV, TensorFlow, MySQL, and image processing techniques.
 
 ---
 
 ## 🚀 Features
-
-- 🔍 Real-time threat detection  
-- 🧠 AI/ML model for pattern analysis  
-- 📊 Visual dashboard for threat logs  
-- 🗄️ Secure SQL-based data handling  
-- ⚡ Fast API responses (optimized backend)  
-- 🎨 Clean, responsive Bootstrap UI  
-
----
-
-## 🛠️ Tech Stack
-
-**Frontend:** HTML, CSS, Bootstrap  
-**Backend:** Python (Flask/FastAPI)  
-**Database:** MySQL / SQLite  
-**AI Model:** Scikit-learn / Custom model  
-**Deployment Ready:** Yes  
+- Real-time video monitoring (OpenCV)
+- Face capture and comparison using image hashing
+- Deep Learning–based DCNN classifier
+- Automatic alert generation with SMS API
+- Admin & User login system
+- MySQL database for logs, users, and captured faces
+- Image preprocessing (denoising, segmentation, thresholding)
 
 ---
 
 ## 📂 Project Structure
+AI-Threat-Detector/
+│── main.py
+│── camera.py
+│── DCNN.py
+│── static/
+│── templates/
+│── dataset/
+│── requirements.txt
+│── README.md
 
+## 🔧 Installation
+pip install -r requirements.txt
+
+
+## ▶️ Run the Project
+python main.py
+Copy code
+Visit in browser:
+http://127.0.0.1:5000
+
+## 🗄 Database
+Create a MySQL database:
